@@ -1,5 +1,5 @@
 // Вставь свои ключи сюда
-const SUPABASE_URL = "postgresql://postgres:@db.prhzhpdcjehktfaudnmy.supabase.co:5432/postgres";
+const SUPABASE_URL = "db.prhzhpdcjehktfaudnmy.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByaHpocGRjamVoa3RmYXVkbm15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMDk5MTYsImV4cCI6MjA3OTc4NTkxNn0.uzxomssdiHK5QADOy3_7bpPk9eDx7u2DCHlHYx9Uun4";
 
 const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
