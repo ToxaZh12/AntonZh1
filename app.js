@@ -1,5 +1,5 @@
 // Вставь свои ключи сюда
-const SUPABASE_URL = "toxa_zh";
+const SUPABASE_URL = "postgresql://postgres:@db.prhzhpdcjehktfaudnmy.supabase.co:5432/postgres";
 const SUPABASE_KEY = "I9JSON091";
 
 const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
