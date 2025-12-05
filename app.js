@@ -1,12 +1,11 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
+// Создаем клиент Supabase
 const SUPABASE_URL = "https://pmacinsqgvpglhcqfcnx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYWNpbnNxZ3ZwZ2xoY3FmY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzI2NjEsImV4cCI6MjA3OTgwODY2MX0.wAwq1m4zqX42WOiwjzl3khstPLoZUjaq5bP3BTaamrE";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const LOCAL_STORAGE_KEY = "users";
 
-// Загрузка пользователей с Supabase или localStorage
+// Загрузка пользователей
 async function loadUsers() {
   try {
     const { data, error } = await supabase.from("users").select("*").order("id");
@@ -22,7 +21,7 @@ async function loadUsers() {
   return localData ? JSON.parse(localData) : [];
 }
 
-// Сохраняем пользователей локально
+// Сохраняем локально
 function saveLocal(users) {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
 }
@@ -30,7 +29,7 @@ function saveLocal(users) {
 // Добавление пользователя
 async function addUser(user) {
   try {
-    const { error, data } = await supabase.from("users").insert(user).select();
+    const { data, error } = await supabase.from("users").insert(user).select();
     if (error) throw error;
     const users = await loadUsers();
     users.push(...data);
@@ -38,7 +37,7 @@ async function addUser(user) {
   } catch (err) {
     console.warn("Сохраняем локально:", err);
     const users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
-    const newUser = { ...user, id: Date.now() }; // временный id
+    const newUser = { ...user, id: Date.now() };
     users.push(newUser);
     saveLocal(users);
   }
