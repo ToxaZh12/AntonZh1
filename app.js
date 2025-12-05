@@ -4,11 +4,10 @@ const SUPABASE_URL = "https://pmacinsqgvpglhcqfcnx.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtYWNpbnNxZ3ZwZ2xoY3FmY254Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzI2NjEsImV4cCI6MjA3OTgwODY2MX0.wAwq1m4zqX42WOiwjzl3khstPLoZUjaq5bP3BTaamrE";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const LOCAL_STORAGE_KEY = "users";
 
+// Загрузка пользователей с Supabase или localStorage
 async function loadUsers() {
-  // Сначала пробуем загрузить из Supabase
   try {
     const { data, error } = await supabase.from("users").select("*").order("id");
     if (error) throw error;
@@ -17,74 +16,68 @@ async function loadUsers() {
       return data;
     }
   } catch (err) {
-    console.error("Supabase error:", err);
+    console.warn("Supabase недоступен, используем локальные данные.", err);
   }
-
-  // Если Supabase недоступен, используем локальные данные
   const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
   return localData ? JSON.parse(localData) : [];
 }
 
+// Сохраняем пользователей локально
+function saveLocal(users) {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
+}
+
+// Добавление пользователя
 async function addUser(user) {
   try {
     const { error, data } = await supabase.from("users").insert(user).select();
     if (error) throw error;
-
-    // Сохраняем в localStorage
     const users = await loadUsers();
     users.push(...data);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
+    saveLocal(users);
   } catch (err) {
-    console.error(err);
-    // Добавляем локально, если сервер не доступен
+    console.warn("Сохраняем локально:", err);
     const users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
     const newUser = { ...user, id: Date.now() }; // временный id
     users.push(newUser);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
+    saveLocal(users);
   }
 }
 
+// Обновление пользователя
 async function updateUser(id, updated) {
   try {
     const { error } = await supabase.from("users").update(updated).eq("id", id);
     if (error) throw error;
-
-    const users = await loadUsers();
-    const idx = users.findIndex(u => u.id == id);
-    if (idx !== -1) {
-      users[idx] = { ...users[idx], ...updated };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
-    }
   } catch (err) {
-    console.error(err);
-    const users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
-    const idx = users.findIndex(u => u.id == id);
-    if (idx !== -1) {
-      users[idx] = { ...users[idx], ...updated };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
-    }
+    console.warn("Обновляем локально:", err);
+  }
+  const users = await loadUsers();
+  const idx = users.findIndex(u => u.id == id);
+  if (idx !== -1) {
+    users[idx] = { ...users[idx], ...updated };
+    saveLocal(users);
   }
 }
 
+// Удаление пользователя
 async function deleteUser(id) {
   try {
     const { error } = await supabase.from("users").delete().eq("id", id);
     if (error) throw error;
-
-    const users = await loadUsers();
-    const filtered = users.filter(u => u.id != id);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(filtered));
   } catch (err) {
-    console.error(err);
-    const users = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || "[]");
-    const filtered = users.filter(u => u.id != id);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(filtered));
+    console.warn("Удаляем локально:", err);
   }
+  const users = await loadUsers();
+  const filtered = users.filter(u => u.id != id);
+  saveLocal(filtered);
 }
 
+// DOM элементы
 const form = document.getElementById("userForm");
 const tbody = document.getElementById("tableBody");
 
+// Отрисовка таблицы
 async function render() {
   const users = await loadUsers();
   tbody.innerHTML = "";
@@ -103,6 +96,7 @@ async function render() {
   });
 }
 
+// Обработчик формы
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const id = document.getElementById("userId").value;
@@ -116,6 +110,7 @@ form.addEventListener("submit", async e => {
   await render();
 });
 
+// Редактирование пользователя
 async function editUser(id) {
   const users = await loadUsers();
   const u = users.find(x => x.id == id);
@@ -125,13 +120,15 @@ async function editUser(id) {
   document.getElementById("email").value = u.email;
 }
 
+// Удаление пользователя через UI
 async function deleteUserUI(id) {
   await deleteUser(id);
   await render();
 }
 
-// Делаем функции доступными глобально, чтобы кнопки с onclick работали
+// Делаем функции глобальными для onclick
 window.editUser = editUser;
 window.deleteUserUI = deleteUserUI;
 
+// Начальная отрисовка
 render();
