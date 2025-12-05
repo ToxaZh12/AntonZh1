@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,22 +8,22 @@
 </head>
 <body>
   <div class="container">
-    <h1>Mini CRUD на JavaScript</h1>
+    <h1>Mini CRUD</h1>
 
     <form id="userForm">
       <input type="hidden" id="userId">
-      <label>Имя: <input type="text" id="name" required></label>
+      <label>Name: <input type="text" id="name" required></label>
       <label>Email: <input type="email" id="email" required></label>
-      <button type="submit">Сохранить</button>
+      <button type="submit">Save</button>
     </form>
 
     <table>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Имя</th>
+          <th>Name</th>
           <th>Email</th>
-          <th>Действия</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
